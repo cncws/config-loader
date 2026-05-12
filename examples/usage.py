@@ -1,5 +1,7 @@
 """
 配置加载器使用示例
+
+cd examples && uv run usage.py
 """
 
 import json

@@ -45,7 +45,7 @@ config-loader/
 
 4. **`_replace_env_vars(obj: Any) -> Any`**
    - 递归替换对象中的环境变量占位符
-   - 支持 `${VAR}` 和 `${VAR:default}` 两种格式
+   - 支持 `${VAR}` 和 `${VAR:-default}` 两种格式（兼容 `${VAR:default}` 旧写法）
    - 处理字符串、字典、列表
 
 ## 关键设计决策
@@ -64,7 +64,7 @@ if active:
 
 这允许用户通过环境变量动态控制使用哪个配置文件：
 ```yaml
-active: ${CONFIG_ENV:dev}
+active: ${CONFIG_ENV:-dev}
 ```
 
 ### 2. 配置文件查找顺序
@@ -152,7 +152,7 @@ pytest tests/ --cov=config_loader
 
 ### 添加新的环境变量格式
 
-当前支持：`${VAR}` 和 `${VAR:default}`
+当前支持：`${VAR}` 和 `${VAR:-default}`
 
 如需添加新格式（如 `#{VAR}`）：
 1. 修改 `_replace_env_vars` 中的正则表达式
@@ -187,7 +187,7 @@ pytest tests/ --cov=config_loader
 1. **配置文件名固定**：必须是 `config.yaml` 和 `config.{active}.yaml`
 2. **单层 active**：不支持多层环境嵌套（如 dev.local）
 3. **无配置缓存**：每次调用 `load_yaml()` 都重新读取文件
-4. **环境变量仅字符串**：不支持类型转换（如 `${PORT:8080}` 结果是字符串 "8080"）
+4. **环境变量仅字符串**：不支持类型转换（如 `${PORT:-8080}` 结果是字符串 "8080"）
 
 ## 快速参考
 
@@ -198,10 +198,10 @@ pytest tests/ --cov=config_loader
 value: ${ENV_VAR}
 
 # 使用环境变量，不存在时用默认值
-value: ${ENV_VAR:default}
+value: ${ENV_VAR:-default}
 
 # active 字段也支持环境变量
-active: ${CONFIG_ENV:dev}
+active: ${CONFIG_ENV:-dev}
 ```
 
 ### 配置合并示例

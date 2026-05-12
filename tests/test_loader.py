@@ -54,7 +54,7 @@ def test_env_var_replacement():
         config_file = os.path.join(tmpdir, "config.yaml")
         with open(config_file, "w") as f:
             f.write(
-                "app:\n  value: ${TEST_VAR}\n  default: ${NONEXISTENT:default_val}\n"
+                "app:\n  value: ${TEST_VAR}\n  default: ${NONEXISTENT:-default_val}\n"
             )
 
         cwd = os.getcwd()
@@ -124,7 +124,7 @@ def test_active_with_env_var_default():
         config_file = os.path.join(tmpdir, "config.yaml")
         with open(config_file, "w") as f:
             f.write(
-                "active: ${CONFIG_ENV:prod}\napp:\n  name: TestApp\n  debug: false\n"
+                "active: ${CONFIG_ENV:-prod}\napp:\n  name: TestApp\n  debug: false\n"
             )
 
         # 创建生产环境配置文件

@@ -5,9 +5,9 @@ app:
 
 db:
   host: 127.0.0.1
-  password: ${DB_PASSWORD:dev_pass}
+  password: ${DB_PASSWORD:-dev_pass}
   database: myapp_dev
 
 server:
   port: 8888
-  env: ${RUN_ENV:dev}
+  env: ${RUN_ENV:-dev}

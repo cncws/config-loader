@@ -29,7 +29,7 @@ def load_yaml() -> Dict[str, Any]:
     with open(config_file, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
 
-    # 先对active值进行环境变量替换，以支持 active: ${ENV:dev} 这样的配置
+    # 先对active值进行环境变量替换，以支持 active: ${ENV:-dev} 这样的配置
     active = config.get("active", "")
     if active:
         active = _replace_env_vars(active).strip()
@@ -54,11 +54,12 @@ def _merge_dict(base: Dict[str, Any], override: Dict[str, Any]) -> None:
 
 def _replace_env_vars(obj: Any) -> Any:
     if isinstance(obj, str):
-        pattern = r"\$\{([^}:]+)(?::([^}]*))?\}"
+        # 支持 bash 风格默认值 ${VAR:-default}
+        pattern = r"\$\{([^}:]+)(?:(:-)([^}]*))?\}"
 
         def replace(match):
             var_name = match.group(1)
-            default_value = match.group(2) or ""
+            default_value = match.group(3) or ""
             return os.environ.get(var_name, default_value)
 
         return re.sub(pattern, replace, obj)

@@ -28,7 +28,7 @@ app:
 db:
   host: localhost
   port: 3306
-  password: ${DB_PASSWORD:default123}
+  password: ${DB_PASSWORD:-default123}
 ```
 
 **config.dev.yaml**
@@ -55,7 +55,7 @@ print(config["db"]["password"])    # "my_pass"
 ## 环境变量语法
 
 - `${VAR}` - 使用环境变量，不存在时为空
-- `${VAR:default}` - 使用环境变量，不存在时用默认值
+- `${VAR:-default}` - 使用环境变量，不存在时用默认值（兼容 `${VAR:default}` 旧写法）
 
 ## 详细文档
 
@@ -69,7 +69,7 @@ print(config["db"]["password"])    # "my_pass"
 
 ```yaml
 # config.yaml
-active: ${CONFIG_ENV:dev}
+active: ${CONFIG_ENV:-dev}
 
 app:
   name: MyApp
@@ -90,16 +90,16 @@ config = load_yaml()  # 会加载并合并 config.prod.yaml
 支持两种格式：
 
 - `${VAR_NAME}` - 直接读取环境变量，如果不存在则为空字符串
-- `${VAR_NAME:default_value}` - 读取环境变量，如果不存在则使用默认值
+- `${VAR_NAME:-default_value}` - 读取环境变量，如果不存在则使用默认值
 
 示例：
 
 ```yaml
 # 环境变量存在
-database: ${DB_HOST:localhost}  # 如果DB_HOST=mydb.com，则为 "mydb.com"
+database: ${DB_HOST:-localhost}  # 如果DB_HOST=mydb.com，则为 "mydb.com"
 
 # 环境变量不存在
-database: ${DB_HOST:localhost}  # 使用默认值 "localhost"
+database: ${DB_HOST:-localhost}  # 使用默认值 "localhost"
 
 # 不指定默认值
 api_key: ${API_KEY}  # 如果API_KEY不存在，则为空字符串
@@ -177,7 +177,7 @@ config-loader/
 |-----|--------|---------------|
 | 默认配置文件 | application.properties | config.yaml |
 | 环境配置 | application-{active}.properties | config.{active}.yaml |
-| 环境变量 | ${ENV_VAR:default} | ${ENV_VAR:default} |
+| 环境变量 | ${ENV_VAR:-default} | ${ENV_VAR:-default} |
 | 配置格式 | properties/yaml | yaml |
 | active字段支持环境变量 | ✅ | ✅ |
 

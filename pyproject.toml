@@ -1,6 +1,6 @@
 [project]
 name = "config-loader"
-version = "0.1.2"
+version = "0.2.0"
 description = "A lightweight Python config loader inspired by Spring Framework"
 readme = "README.md"
 authors = [
