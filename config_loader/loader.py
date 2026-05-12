@@ -29,7 +29,11 @@ def load_yaml() -> Dict[str, Any]:
     with open(config_file, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
 
-    active = config.get("active", "").strip()
+    # 先对active值进行环境变量替换，以支持 active: ${ENV:dev} 这样的配置
+    active = config.get("active", "")
+    if active:
+        active = _replace_env_vars(active).strip()
+
     if active:
         active_config_file = os.path.join(config_dir, f"config.{active}.yaml")
         if os.path.exists(active_config_file):

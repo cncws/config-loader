@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "config-loader"
-version = "0.1.0"
+dynamic = ["version"]
 description = "A simple Python config loader inspired by Spring Framework"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -18,6 +18,9 @@ Repository = "https://github.com/cncws/config-loader"
 
 [tool.hatch.build.targets.wheel]
 packages = ["config_loader"]
+
+[tool.hatch.version]
+path = "config_loader/__init__.py"
 
 [dependency-groups]
 dev = [

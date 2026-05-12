@@ -7,20 +7,29 @@
 - 📋 **默认配置加载** - 自动读取 `config.yaml` 基础配置文件
 - 🔀 **环境配置合并** - 通过 `active` 参数决定合并的配置文件（如 `config.dev.yaml`）
 - 🌍 **环境变量支持** - 支持 `${VAR_NAME:default_value}` 格式的环境变量替换
-- 🎯 **点号访问** - 支持 `config.get("db.host")` 这样的嵌套访问
+- 🎯 **灵活的active配置** - `active` 字段本身也支持环境变量，如 `active: ${ENV:dev}`
+- 🔍 **自动查找配置** - 自动在当前目录和 `configs/` 子目录中查找配置文件
 
 ## 安装
+
+### 使用 uv（推荐）
+
+```bash
+uv pip install config-loader
+```
+
+### 使用 pip
+
+```bash
+pip install config-loader
+```
 
 ### 从源码安装
 
 ```bash
+git clone https://github.com/cncws/config-loader.git
+cd config-loader
 pip install -e .
-```
-
-### 从PyPI安装（发布后）
-
-```bash
-pip install config-loader
 ```
 
 ## 快速开始
@@ -64,37 +73,56 @@ server:
 ### 2. 使用配置加载器
 
 ```python
-from config_loader import ConfigLoader
+from config_loader import load_yaml
 import os
 
 # 设置环境变量
 os.environ["DB_PASSWORD"] = "my_secure_pass"
 os.environ["SERVER_PORT"] = "9000"
 
-# 创建加载器实例
-loader = ConfigLoader(config_dir="./config")
-
 # 加载配置
-config = loader.load()
+config = load_yaml()
 
-# 获取配置值
-db_host = loader.get("db.host")  # "127.0.0.1" (来自config.dev.yaml)
-db_port = loader.get("db.port")  # 3306
-db_password = loader.get("db.password")  # "my_secure_pass"
-server_port = loader.get("server.port")  # "9000"
-
-# 获取不存在的配置，提供默认值
-timeout = loader.get("db.timeout", 30)  # 30
+# 访问配置值
+db_host = config["db"]["host"]  # "127.0.0.1" (来自config.dev.yaml)
+db_port = config["db"]["port"]  # 3306
+db_password = config["db"]["password"]  # "my_secure_pass"
+server_port = config["server"]["port"]  # "9000"
 ```
 
 ## 配置加载流程
 
-1. **加载基础配置** - 读取 `config.yaml` 文件
-2. **读取active值** - 获取 `config.yaml` 中的 `active` 字段
-3. **合并环境配置** - 如果 `active: dev`，则加载并合并 `config.dev.yaml`
-4. **替换环境变量** - 将所有 `${VAR_NAME:default}` 替换为实际值
+1. **查找配置文件** - 在当前目录或 `configs/` 子目录中查找 `config.yaml`
+2. **加载基础配置** - 读取 `config.yaml` 文件
+3. **处理active字段** - 获取并替换 `active` 字段中的环境变量
+4. **合并环境配置** - 如果 `active: dev`，则加载并合并 `config.dev.yaml`
+5. **替换环境变量** - 将所有 `${VAR_NAME:default}` 替换为实际值
 
-## 环境变量格式
+## 高级用法
+
+### active 字段支持环境变量
+
+`active` 字段本身支持环境变量，这样可以通过环境变量动态切换配置环境：
+
+```yaml
+# config.yaml
+active: ${CONFIG_ENV:dev}
+
+app:
+  name: MyApp
+```
+
+```python
+import os
+from config_loader import load_yaml
+
+# 通过环境变量控制使用哪个配置文件
+os.environ["CONFIG_ENV"] = "prod"
+
+config = load_yaml()  # 会加载并合并 config.prod.yaml
+```
+
+### 环境变量格式
 
 支持两种格式：
 
@@ -114,26 +142,33 @@ database: ${DB_HOST:localhost}  # 使用默认值 "localhost"
 api_key: ${API_KEY}  # 如果API_KEY不存在，则为空字符串
 ```
 
+### 配置文件查找路径
+
+配置加载器会按以下顺序查找 `config.yaml`：
+
+1. 当前工作目录（`os.getcwd()`）
+2. 当前工作目录下的 `configs/` 子目录
+
 ## API 文档
 
-### ConfigLoader
+### load_yaml() -> Dict[str, Any]
 
-#### `__init__(config_dir: str = ".")`
+加载并返回配置字典。
 
-初始化配置加载器
+**返回值**：
+- `Dict[str, Any]` - 合并后的配置字典，所有环境变量已被替换
 
-- `config_dir` - 配置文件所在目录，默认为当前目录
+**异常**：
+- `FileNotFoundError` - 如果找不到 `config.yaml` 文件
 
-#### `load() -> Dict[str, Any]`
+**示例**：
 
-加载并返回配置字典
+```python
+from config_loader import load_yaml
 
-#### `get(key: str, default: Any = None) -> Any`
-
-获取配置值
-
-- `key` - 配置键，支持点号分隔的嵌套路径（如 `"db.host"`）
-- `default` - 如果键不存在的默认值
+config = load_yaml()
+print(config["app"]["name"])
+```
 
 ## 运行示例
 
@@ -168,24 +203,9 @@ config-loader/
 │   └── usage.py             # 使用示例
 ├── tests/
 │   └── test_loader.py       # 单元测试
-├── setup.py                 # 打包配置
+├── pyproject.toml           # 项目配置
 ├── README.md                # 项目文档
 └── .gitignore               # Git忽略配置
-```
-
-## 打包和发布
-
-### 构建包
-
-```bash
-python setup.py sdist bdist_wheel
-```
-
-### 上传到PyPI（需要账号）
-
-```bash
-pip install twine
-twine upload dist/*
 ```
 
 ## 与Spring配置加载的对比
@@ -195,8 +215,8 @@ twine upload dist/*
 | 默认配置文件 | application.properties | config.yaml |
 | 环境配置 | application-{active}.properties | config.{active}.yaml |
 | 环境变量 | ${ENV_VAR:default} | ${ENV_VAR:default} |
-| 配置访问 | @Value | get() 方法 |
 | 配置格式 | properties/yaml | yaml |
+| active字段支持环境变量 | ✅ | ✅ |
 
 ## 许可证
 
