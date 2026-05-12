@@ -1,0 +1,13 @@
+# 开发环境配置，会合并到config.yaml中
+app:
+  debug: true
+  log_level: DEBUG
+
+db:
+  host: 127.0.0.1
+  password: ${DB_PASSWORD:dev_pass}
+  database: myapp_dev
+
+server:
+  port: 8888
+  env: ${RUN_ENV:dev}

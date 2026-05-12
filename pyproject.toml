@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "config-loader"
+version = "0.1.0"
+description = "A simple Python config loader inspired by Spring Framework"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "PyYAML>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/cncws/config-loader"
+Repository = "https://github.com/cncws/config-loader"
+
+[tool.hatch.build.targets.wheel]
+packages = ["config_loader"]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+]
+
+[[tool.uv.index]]
+name = "em"
+url = "http://py.packages.yunwei/simple/"
+publish-url = "http://230205:zSBQ5bEQf5hi@py.packages.yunwei/"
+explicit = true
