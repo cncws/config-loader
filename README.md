@@ -1,43 +1,23 @@
 # Config Loader
 
-一个简洁的Python配置加载器，支持环境变量替换和配置文件合并，设计灵感来自Spring Framework的配置加载机制。
+一个轻量级的 Python 配置加载器，灵感来自 Spring Framework 的配置机制。
 
-## 功能特性
+## 功能
 
-- 📋 **默认配置加载** - 自动读取 `config.yaml` 基础配置文件
-- 🔀 **环境配置合并** - 通过 `active` 参数决定合并的配置文件（如 `config.dev.yaml`）
-- 🌍 **环境变量支持** - 支持 `${VAR_NAME:default_value}` 格式的环境变量替换
-- 🎯 **灵活的active配置** - `active` 字段本身也支持环境变量，如 `active: ${ENV:dev}`
-- 🔍 **自动查找配置** - 自动在当前目录和 `configs/` 子目录中查找配置文件
+- YAML 配置加载和合并
+- 环境变量替换（支持默认值）
+- 多环境配置支持（基于 `active` 字段）
+- 自动配置文件查找
 
 ## 安装
-
-### 使用 uv（推荐）
 
 ```bash
 uv pip install config-loader
 ```
 
-### 使用 pip
-
-```bash
-pip install config-loader
-```
-
-### 从源码安装
-
-```bash
-git clone https://github.com/cncws/config-loader.git
-cd config-loader
-pip install -e .
-```
-
 ## 快速开始
 
-### 1. 创建配置文件
-
-**config.yaml** - 基础配置
-
+**config.yaml**
 ```yaml
 active: dev
 
@@ -48,55 +28,38 @@ app:
 db:
   host: localhost
   port: 3306
-  user: root
-  password: ${DB_PASSWORD:password123}
-
-server:
-  host: 0.0.0.0
-  port: ${SERVER_PORT:8080}
+  password: ${DB_PASSWORD:default123}
 ```
 
-**config.dev.yaml** - 开发环境配置（会合并到基础配置中）
-
+**config.dev.yaml**
 ```yaml
 app:
   debug: true
 
 db:
   host: 127.0.0.1
-  password: ${DB_PASSWORD:dev_pass}
-
-server:
-  port: 8888
 ```
 
-### 2. 使用配置加载器
-
+**使用**
 ```python
 from config_loader import load_yaml
 import os
 
-# 设置环境变量
-os.environ["DB_PASSWORD"] = "my_secure_pass"
-os.environ["SERVER_PORT"] = "9000"
-
-# 加载配置
+os.environ["DB_PASSWORD"] = "my_pass"
 config = load_yaml()
 
-# 访问配置值
-db_host = config["db"]["host"]  # "127.0.0.1" (来自config.dev.yaml)
-db_port = config["db"]["port"]  # 3306
-db_password = config["db"]["password"]  # "my_secure_pass"
-server_port = config["server"]["port"]  # "9000"
+print(config["app"]["debug"])      # True (来自 config.dev.yaml)
+print(config["db"]["password"])    # "my_pass"
 ```
 
-## 配置加载流程
+## 环境变量语法
 
-1. **查找配置文件** - 在当前目录或 `configs/` 子目录中查找 `config.yaml`
-2. **加载基础配置** - 读取 `config.yaml` 文件
-3. **处理active字段** - 获取并替换 `active` 字段中的环境变量
-4. **合并环境配置** - 如果 `active: dev`，则加载并合并 `config.dev.yaml`
-5. **替换环境变量** - 将所有 `${VAR_NAME:default}` 替换为实际值
+- `${VAR}` - 使用环境变量，不存在时为空
+- `${VAR:default}` - 使用环境变量，不存在时用默认值
+
+## 详细文档
+
+参见 [CLAUDE.md](CLAUDE.md) 了解完整的开发指南。
 
 ## 高级用法
 

@@ -10,7 +10,6 @@ NC := \033[0m # No Color
 clean:
 	@echo "$(GREEN)Cleaning build artifacts...$(NC)"
 	rm -rf dist/ build/
-	@echo "$(GREEN)Clean complete!$(NC)"
 
 test:
 	@echo "$(GREEN)Running tests...$(NC)"
